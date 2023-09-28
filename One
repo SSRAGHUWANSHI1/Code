@@ -1,0 +1,147 @@
+import UIKit
+
+// Define data models for drivers, vehicles, and rides
+struct Driver {
+    let name: String
+}
+
+struct Vehicle {
+    let name: String
+}
+
+struct Ride {
+    let startLocation: String
+    let endLocation: String
+    let fare: Double
+    let driver: Driver
+    let vehicle: Vehicle
+}
+
+class TaxiRideViewController: UIViewController {
+
+    // Define UI elements
+    @IBOutlet weak var segmentedControl: UISegmentedControl!
+    @IBOutlet weak var driverLabel: UILabel!
+    @IBOutlet weak var startLocationTextField: UITextField!
+    @IBOutlet weak var endLocationTextField: UITextField!
+    @IBOutlet weak var fareTextField: UITextField!
+    @IBOutlet weak var billAmountLabel: UILabel!
+    
+    // Dummy data
+    let drivers = [Driver(name: "John"), Driver(name: "Alice")]
+    let vehicles = [Vehicle(name: "Car"), Vehicle(name: "Bike")]
+    
+    var selectedDriver: Driver?
+    var selectedVehicle: Vehicle?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // Initialize the segmented control and UI elements
+        segmentedControl.selectedSegmentIndex = 0
+        selectedVehicle = vehicles.first
+        selectedDriver = drivers.first
+    }
+    
+    @IBAction func vehicleSelectionChanged(_ sender: UISegmentedControl) {
+        // Update driver and other UI elements based on the selected vehicle type
+        let selectedIndex = sender.selectedSegmentIndex
+        selectedVehicle = vehicles[selectedIndex]
+        selectedDriver = drivers[selectedIndex]
+        
+        // Update the driver label
+        driverLabel.text = selectedDriver?.name
+    }
+    
+    @IBAction func calculateBillButtonTapped(_ sender: UIButton) {
+        // Calculate the bill based on ride details
+        guard let startLocation = startLocationTextField.text,
+              let endLocation = endLocationTextField.text,
+              let fareText = fareTextField.text,
+              let fare = Double(fareText) else {
+            return
+        }
+        
+        // Create a Ride object with the entered details
+        let ride = Ride(startLocation: startLocation,
+                        endLocation: endLocation,
+                        fare: fare,
+                        driver: selectedDriver!,
+                        vehicle: selectedVehicle!)
+        
+        // Calculate and display the bill amount
+        let billAmount = calculateBill(for: ride)
+        billAmountLabel.text = String(format: "Bill Amount: $%.2f", billAmount)
+    }
+    
+    func calculateBill(for ride: Ride) -> Double {
+        // Implement your bill calculation logic here (e.g., based on distance, time, etc.)
+        // For this example, we'll simply return the fare.
+        return ride.fare
+    }
+    
+    @IBAction func printBillButtonTapped(_ sender: UIButton) {
+        // Implement printing functionality here (using UIPrintInteractionController)
+        // ...
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+@IBAction func printBillButtonTapped(_ sender: UIButton) {
+    // Create a UIView that represents the bill
+    let billView = createBillView()
+    
+    // Create a print interaction controller
+    let printController = UIPrintInteractionController.shared
+    
+    // Configure the print settings (e.g., page range, duplex printing, etc.) if needed
+    let printInfo = UIPrintInfo(dictionary: nil)
+    printInfo.outputType = .general
+    printController.printInfo = printInfo
+    
+    // Set the print view
+    printController.printingItem = billView
+    
+    // Present the print controller
+    printController.present(animated: true) { (controller, completed, error) in
+        if completed {
+            print("Printing completed successfully.")
+        } else if let error = error {
+            print("Printing failed with error: \(error.localizedDescription)")
+        }
+    }
+}
+
+// Function to create the bill view (similar to previous examples)
+private func createBillView() -> UIView {
+    let billView = UIView(frame: CGRect(x: 0, y: 0, width: 300, height: 400)) // Adjust the frame size as needed
+
+    // Populate the bill view with ride details, driver name, and other information using UILabels and other UI components
+    let rideDetailsLabel = UILabel(frame: CGRect(x: 20, y: 20, width: 260, height: 30))
+    rideDetailsLabel.text = "Ride Details: [Your ride details here]"
+
+    let driverNameLabel = UILabel(frame: CGRect(x: 20, y: 60, width: 260, height: 30))
+    driverNameLabel.text = "Driver: [Driver name here]"
+
+    // Add more labels and UI elements for other bill information
+
+    // Add the labels to the bill view
+    billView.addSubview(rideDetailsLabel)
+    billView.addSubview(driverNameLabel)
+
+    // Customize the bill view's appearance and layout as needed
+
+    return billView
+}
+
